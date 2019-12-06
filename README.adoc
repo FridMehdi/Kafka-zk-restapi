@@ -31,20 +31,6 @@ image::https://raw.githubusercontent.com/gnuhpc/Kafka-zk-restapi/master/pics/Sho
 
 We have also opensourced a simple but useful UI for these APIs. Please check https://github.com/gnuhpc/Kafka-zk-restapi-UI for more details.
 
-Here are some snapshots of this UI:
-
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/KafkaDashboard.png[KafkaDashboard]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/TopicManage.png[TopicManage]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/TopicPartitionView.png[TopicPartitionView]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/ConsumersGetByTopic.png[ConsumersGetByTopic]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/ManualReassignPartitions.png[ManualReassignPartitions]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/MessageView.png[MessageView]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/SchemaView.png[SchemaView]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/ConsumerGroup.png[ConsumerGroup]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/TopicsGetByGroup.png[TopicsGetByGroup]
-image::https://github.com/gnuhpc/Kafka-zk-restapi-UI/blob/master/screenshots/ConsumersGetByGroupAndTopic.png[ConsumersGetByGroupAndTopic]
-
-
 === Installation and run
 First of all, Java 8 jre/jdk needed.
 
@@ -57,12 +43,17 @@ You can get it running by unzip/untaring the distribution package, perform some 
 
 You can build this restapi server using maven.
 
-. git clone https://github.com/gnuhpc/Kafka-zk-restapi.git +
-. cd Kafka-zk-restapi/ +
-. mvn clean package -Dmaven.test.skip=true +
+. `$ git clone \https://github.com/gnuhpc/Kafka-zk-restapi.git`
+. `$ cd Kafka-zk-restapi/`
+. `$ mvn clean package -Dmaven.test.skip=true`
 
-After maven building, you will find zip/tar under directory: Kafka-zk-restapi/target
+After maven building, you will find zip/tar under directory: Kafka-zk-restapi/target.
 
+**New**:
+Now we support build docker image using spotify docker-maven-plugin.
+A docker image named kafka-rest-springboot:latest is created after building. If you want
+to build your own image, modify application property files in src/main/resources first.
+Details refer to <<_How to config,'How to config'>>
 
 === How to config
 You can get it running by unzip/untaring the distribution package and change the corresponding configuration in config directory:
@@ -81,11 +72,32 @@ More details refer to https://github.com/gnuhpc/Kafka-zk-restapi/blob/master/doc
 See below: <<_security,'How to config security'>>
 
 === How to run
-. tar -xvf kafka-zk-api-1.1.x-release-dist.tar
+==== A. Pulling from Docker hub
+Step 1 : Prepare a directory that contains spring application property files as a volume to mount into the container.
+Custom your own parameters such as Kafka/zk addresses, schema registry url, security params, etc.
+
+Step 2 : Run the image. /XX/XX/config is the directory that noticed in Step 1.
+
+`$ docker run -p 8121:8121 -v /XX/XX/config:/app/config --env JAVA_OPTS='-Xms1g -Xmx1g' tinawenqiao/kafka-rest-springboot`
+
+Details refer to https://hub.docker.com/r/tinawenqiao/kafka-rest-springboot
+
+Note: Make sure advertised.listeners(kafka server property) is set correctly if you access kafka from docker image.
+
+==== B. Run your own docker image
+
+`$ docker run -p 8121:8121 --env JAVA_OPTS='-Xms1g -Xmx1g' tinawenqiao/kafka-rest-springboot:latest`
+
+Note: Make sure advertised.listeners(kafka server property) is set correctly if you access kafka from docker image.
+
+See <<_How to build,'How to build'>>
+
+==== C. Use the built tar/zip package
+. `$ tar -xvf kafka-zk-api-1.1.x-release-dist.tar`
   or
-  unzip kafka-zk-api-1.1.x-release-dist.zip
-. cd kafka-zk-api-1.1.x-release-dist
-. bin/start.sh
+  `$ unzip kafka-zk-api-1.1.x-release-dist.zip`
+. `$ cd kafka-zk-api-1.1.x-release-dist`
+. `$ bin/start.sh`
 
  Note: If connect to a kafka cluster that adds SASL authentication, add -Djava.security.auth.login.config=jaas.conf to JVM property.
 
